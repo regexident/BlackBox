@@ -2,11 +2,28 @@ import XCTest
 @testable import BlackBox
 
 final class BlackBoxTests: XCTestCase {
-    func testExample() throws {
-        // XCTest Documentation
-        // https://developer.apple.com/documentation/xctest
+    func testBlackBox() throws {
+        func measured(_ closure: () throws -> Void) rethrows -> TimeInterval {
+            let before = Date()
+            try closure()
+            let after = Date()
 
-        // Defining Test Cases and Test Methods
-        // https://developer.apple.com/documentation/xctest/defining_test_cases_and_test_methods
+            return after.timeIntervalSince(before)
+        }
+
+        // The black-boxed block should take significantly longer to run than the empty placebo one:
+
+        let placebo = measured {
+            // intentionally left blank
+        }
+
+        let blackbox = measured {
+            for i in 0..<1_000_000 {
+                blackBox(i)
+            }
+        }
+
+        let safetyFactor = 10.0
+        XCTAssertGreaterThan(blackbox, safetyFactor * placebo)
     }
 }
